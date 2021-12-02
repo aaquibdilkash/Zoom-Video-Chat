@@ -2,6 +2,8 @@ const socket = io("/");
 const videoGrid = document.getElementById("video-grid");
 const myVideo = document.createElement("video");
 myVideo.muted = true;
+const peers = {}
+
 
 var peer = new Peer(undefined, {
   path: "/peerjs",
@@ -46,6 +48,10 @@ navigator.mediaDevices
     });
   });
 
+socket.on("user-disconnected", (userId) => {
+  if (peers[userId]) peers[userId].close();
+});
+
 peer.on("open", (id) => {
   socket.emit("join-room", ROOM_ID, id);
 });
@@ -66,64 +72,62 @@ const addVideoStream = (video, stream) => {
   videoGrid.append(video);
 };
 
-
 const scrollToBottom = () => {
-    let d = $(".main__chat_window")
-    d.scrollTop(d.prop("scrollHeight"))
-}
-
+  let d = $(".main__chat_window");
+  d.scrollTop(d.prop("scrollHeight"));
+};
 
 const muteUnmute = () => {
-    const enabled = myVideoStream.getAudioTracks()[0].enabled;
-    if (enabled) {
-      myVideoStream.getAudioTracks()[0].enabled = false;
-      setUnmuteButton();
-    } else {
-      setMuteButton();
-      myVideoStream.getAudioTracks()[0].enabled = true;
-    }
+  const enabled = myVideoStream.getAudioTracks()[0].enabled;
+  if (enabled) {
+    myVideoStream.getAudioTracks()[0].enabled = false;
+    setUnmuteButton();
+  } else {
+    setMuteButton();
+    myVideoStream.getAudioTracks()[0].enabled = true;
   }
-  
-  const playStop = () => {
-    console.log('object')
-    let enabled = myVideoStream.getVideoTracks()[0].enabled;
-    if (enabled) {
-      myVideoStream.getVideoTracks()[0].enabled = false;
-      setPlayVideo()
-    } else {
-      setStopVideo()
-      myVideoStream.getVideoTracks()[0].enabled = true;
-    }
+};
+
+const playStop = () => {
+  console.log("object");
+  let enabled = myVideoStream.getVideoTracks()[0].enabled;
+  if (enabled) {
+    myVideoStream.getVideoTracks()[0].enabled = false;
+    setPlayVideo();
+  } else {
+    setStopVideo();
+    myVideoStream.getVideoTracks()[0].enabled = true;
   }
-  
-  const setMuteButton = () => {
-    const html = `
+};
+
+const setMuteButton = () => {
+  const html = `
       <i class="fas fa-microphone"></i>
       <span>Mute</span>
-    `
-    document.querySelector('.main__mute_button').innerHTML = html;
-  }
-  
-  const setUnmuteButton = () => {
-    const html = `
+    `;
+  document.querySelector(".main__mute_button").innerHTML = html;
+};
+
+const setUnmuteButton = () => {
+  const html = `
       <i class="unmute fas fa-microphone-slash"></i>
       <span>Unmute</span>
-    `
-    document.querySelector('.main__mute_button').innerHTML = html;
-  }
-  
-  const setStopVideo = () => {
-    const html = `
+    `;
+  document.querySelector(".main__mute_button").innerHTML = html;
+};
+
+const setStopVideo = () => {
+  const html = `
       <i class="fas fa-video"></i>
       <span>Stop Video</span>
-    `
-    document.querySelector('.main__video_button').innerHTML = html;
-  }
-  
-  const setPlayVideo = () => {
-    const html = `
+    `;
+  document.querySelector(".main__video_button").innerHTML = html;
+};
+
+const setPlayVideo = () => {
+  const html = `
     <i class="stop fas fa-video-slash"></i>
       <span>Play Video</span>
-    `
-    document.querySelector('.main__video_button').innerHTML = html;
-  }
+    `;
+  document.querySelector(".main__video_button").innerHTML = html;
+};
